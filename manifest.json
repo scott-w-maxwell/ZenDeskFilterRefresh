@@ -1,6 +1,6 @@
 {
   "name": "ZenDesk Filter Refresher",
-  "description": "Auto Refresh your ZenDesk Filters",
+  "description": "Automatically refreshes the ZenDesk Ticket Counts for the different views",
   "version": "0.1.0",
   "manifest_version": 3,
   "background": {
