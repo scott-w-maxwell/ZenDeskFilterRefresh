@@ -1,6 +1,8 @@
 # ZenDeskFilterRefresh
 This is a Chrome Extension for refreshing filters on ZenDesk.
 
+It can be added here: https://chrome.google.com/webstore/detail/zendesk-filter-refresher/kbnadckimgmhcchlnoddmihobfmloocp?hl=en&authuser=1
+
 I created this since the one created by [brandonstubbs](https://github.com/brandonstubbs/ZendeskRefresh) is no longer working.
 I plan on maintaining this one, and plan to improve it as time progresses.
 
