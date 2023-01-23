@@ -6,6 +6,11 @@ saveButton.addEventListener('click', ()=>{
     console.log(newInterval)
     // Send value to background.js
     chrome.runtime.sendMessage({action: 'update', interval:newInterval})
+    var message = document.getElementById('message')
+    message.classList = "show"
+   setTimeout(()=>{
+    message.classList = "hidden"
+   }, "3000");
 })
 
 
