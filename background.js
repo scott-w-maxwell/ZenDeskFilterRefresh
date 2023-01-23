@@ -21,6 +21,20 @@ async function getCurrentTab() {
   return tab;
 }
 
+function injectScript(interval){
+
+  // clear interval if one already exists
+  if(typeof zendesk_refresh != 'undefined'){
+    clearInterval(zendesk_refresh)
+  }
+
+  // set interval to click button
+  zendesk_refresh = setInterval(function(){
+    let refresh = document.querySelectorAll("[data-test-id='views_views-list_header-refresh']");
+    refresh.click()
+  }, interval * 1000);
+}
+
 chrome.history.onVisited.addListener((visited_site) => {
   let tab = getCurrentTab()
   tab.then(function (tab) {
@@ -36,7 +50,8 @@ chrome.history.onVisited.addListener((visited_site) => {
       chrome.scripting.executeScript(
         {
           target: { 'tabId': tab.id, allFrames: true },
-          files: ['jquery-3.6.3.min.js', 'content.js'],
+          func: injectScript,
+          args: [systemState.interval]
         });
     }
 
@@ -45,12 +60,15 @@ chrome.history.onVisited.addListener((visited_site) => {
 
 chrome.runtime.onMessage.addListener(
   async function(request, sender, sendResponse){
+
+    // If save button was pressed in popup
     if(request.action == 'update'){
       systemState.interval = request.interval
       chrome.storage.local.set({'systemState': systemState})
       console.log('Updated interval to: ' + request.interval + " seconds")
     }
 
+    // If popup was opened
     if(request.action == 'getInterval'){
       sendResponse(systemState.interval)
     }
