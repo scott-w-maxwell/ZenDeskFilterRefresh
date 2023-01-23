@@ -14,21 +14,23 @@ chrome.storage.local.get('systemState', function(result){
 
 chrome.storage.local.set({'systemState': systemState})
 
-async function getCurrentTab() {
-  let queryOptions = { active: true, lastFocusedWindow: true };
+async function getTab() {
+  let queryOptions = { url:"https://*.zendesk.com/agent/filters/*" };
   // `tab` will either be a `tabs.Tab` instance or `undefined`.
   let [tab] = await chrome.tabs.query(queryOptions);
+  console.log(tab)
   return tab;
 }
 
+// Function that runs on ZenDesk Page
 function injectScript(interval){
 
-  // clear interval if one already exists
+  // Clear interval if one already exists
   if(typeof zendesk_refresh != 'undefined'){
     clearInterval(zendesk_refresh)
   }
 
-  // set interval to click button
+  // Set interval to click button
   zendesk_refresh = setInterval(function(){
     let refresh = document.querySelectorAll("[data-test-id='views_views-list_header-refresh']")[0];
     refresh.click()
@@ -36,7 +38,7 @@ function injectScript(interval){
 }
 
 chrome.history.onVisited.addListener((visited_site) => {
-  let tab = getCurrentTab()
+  let tab = getTab()
   tab.then(function (tab) {
 
     // Change visited_site to just the URL data
@@ -66,6 +68,17 @@ chrome.runtime.onMessage.addListener(
       systemState.interval = request.interval
       chrome.storage.local.set({'systemState': systemState})
       console.log('Updated interval to: ' + request.interval + " seconds")
+
+      // Re-inject script in tab
+      let tab = getTab()
+      tab.then(function (tab) {
+        chrome.scripting.executeScript(
+          {
+            target: { 'tabId': tab.id, allFrames: true },
+            func: injectScript,
+            args: [systemState.interval]
+          });
+      })
     }
 
     // If popup was opened
