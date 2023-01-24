@@ -12,4 +12,4 @@ I do plan on creating a FireFox variant, but I have never created a Firefox Add-
 
 ----
 If you would like to show your support, you can send me some BTC:
-bc1qc4p66x7fztg64n6h02erl2k969l3c5ek4tg3jj
+bc1q5eu7xs3k5dvrgvths6xxx80c6fn9cuecxpe7tl
