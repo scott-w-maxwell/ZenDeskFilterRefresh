@@ -1,0 +1,31 @@
+body{
+    background-color:rgb(61, 59, 59); 
+    color:white; 
+    width:200px;
+    height:100px;
+}
+
+.hidden{
+    opacity:0%;
+    transition: 2s;
+}
+
+.show{
+    opacity:100%;
+    transition: 2s;
+}
+
+#save{
+    margin-top:20px;
+    background-color:rgb(20, 97, 95);
+    color:white;
+    width:75px;
+    height:30px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+#interval{
+    width: 30px;
+}
