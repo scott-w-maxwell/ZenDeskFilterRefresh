@@ -6,7 +6,6 @@ saveButton.addEventListener('click', ()=>{
     
     // Check if not a number
     if( isNaN(parseInt(newInterval))){
-
         var message = document.getElementById('message')
         message.innerHTML = "Not a valid interval"
         message.classList = "show"
@@ -20,7 +19,7 @@ saveButton.addEventListener('click', ()=>{
         var message = document.getElementById('message')
         message.innerHTML = "Interval Saved & Updated"
         // Send value to background.js
-        chrome.runtime.sendMessage({action: 'update', interval:newInterval})
+        browser.runtime.sendMessage({action: 'update', interval:newInterval})
         var message = document.getElementById('message')
         message.classList = "show"
        setTimeout(()=>{
@@ -35,12 +34,7 @@ function intervalFill(currentInterval){
     document.getElementById('interval').value = currentInterval
 }
 
-chrome.runtime.sendMessage({action: 'getInterval'}, (response)=>{
-    if(response.interval){
-        intervalFill(response.interval)
-    }else{
-        setTimeout(()=>{
-            intervalFill(response)
-        }, "300")
-    }
+
+browser.runtime.sendMessage({action: 'getInterval'}, (response)=>{
+    intervalFill(response)
 })

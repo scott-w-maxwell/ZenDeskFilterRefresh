@@ -1,7 +1,7 @@
 {
   "name": "ZenDesk Refresher",
   "description": "Automatically refreshes the ZenDesk Ticket Counts for the different views",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "manifest_version": 3,
   "background": {
       "scripts": ["background.js"]
@@ -14,7 +14,7 @@
       "128":"icon.png"
     },
   "permissions":[
-    "scripting", "history", "storage", "tabs"
+    "scripting", "webNavigation", "storage", "tabs", "history"
   ],
   "host_permissions":[
     "https://*.zendesk.com/agent/*"
