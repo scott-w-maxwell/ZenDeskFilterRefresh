@@ -35,12 +35,24 @@ function intervalFill(currentInterval){
     document.getElementById('interval').value = currentInterval
 }
 
-chrome.runtime.sendMessage({action: 'getInterval'}, (response)=>{
-    if(response.interval){
-        intervalFill(response.interval)
-    }else{
-        setTimeout(()=>{
-            intervalFill(response)
-        }, "300")
+chrome.runtime.sendMessage({action: 'getInterval'}, function(response) {
+    if (response !== undefined) {
+      // Access the interval property if it's not undefined
+        intervalFill(response.systemState.interval)
+        console.log(response.systemState.interval)
     }
-})
+  });
+
+
+  
+  
+  
+  
+  
+
+
+
+
+
+
+

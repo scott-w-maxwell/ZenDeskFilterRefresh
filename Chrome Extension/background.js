@@ -1,18 +1,19 @@
-// Set systemState
 let systemState = {
   interval: 10 // seconds
 }
 
 chrome.storage.local.get('systemState', function(result){
   let isEmpty = Object.keys(result).length === 0;
+  
+  // Extensions was installed
   if (isEmpty){
+    console.log('Setting interval in storage to 10')
     chrome.storage.local.set({'systemState': systemState})
   }else{
+    console.log('unique interval value exists')
     systemState.interval = result.systemState.interval
   }
 })
-
-chrome.storage.local.set({'systemState': systemState})
 
 async function getTab() {
   let queryOptions = { url:"https://*.zendesk.com/agent/filters/*" };
@@ -61,12 +62,18 @@ chrome.history.onVisited.addListener((visited_site) => {
 })
 
 chrome.runtime.onMessage.addListener(
-  async function(request, sender, sendResponse){
+   function(request, sender, sendResponse){
 
     // If save button was pressed in popup
     if(request.action == 'update'){
+
+      // Set new interval to systemState object
       systemState.interval = request.interval
+
+      // Set new interval in storage
       chrome.storage.local.set({'systemState': systemState})
+
+      // Show that the interval was loaded
       console.log('Updated interval to: ' + request.interval + " seconds")
 
       // Re-inject script in tab
@@ -82,7 +89,12 @@ chrome.runtime.onMessage.addListener(
     }
 
     // If popup was opened
-    if(request.action == 'getInterval'){
-      sendResponse(systemState.interval)
+    if (request.action == 'getInterval') {
+      chrome.storage.local.get('systemState', function(result) {
+        console.log(result)
+        sendResponse(result);
+      })
+      return true
     }
-  })
+  }
+)
