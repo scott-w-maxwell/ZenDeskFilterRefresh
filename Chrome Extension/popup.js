@@ -15,7 +15,6 @@ saveButton.addEventListener('click', ()=>{
        }, "3000");
 
     }else{
-        console.log(newInterval)
 
         var message = document.getElementById('message')
         message.innerHTML = "Interval Saved & Updated"
@@ -39,7 +38,6 @@ chrome.runtime.sendMessage({action: 'getInterval'}, function(response) {
     if (response !== undefined) {
       // Access the interval property if it's not undefined
         intervalFill(response.systemState.interval)
-        console.log(response.systemState.interval)
     }
   });
 
