@@ -50,14 +50,16 @@ chrome.history.onVisited.addListener((visited_site) => {
     // Get full URL for string comparison
     visited_url = visited_site.host + visited_site.pathname
 
-    // Only run this script for urls containing .zendesk.com/agent
-    if (visited_url.indexOf('.zendesk.com/agent/filters') != -1) {
-      chrome.scripting.executeScript(
-        {
-          target: { 'tabId': tab.id, allFrames: true },
-          func: injectScript,
-          args: [systemState.interval]
-        });
+    if(tab.id !== undefined){
+      // Only run this script for urls containing .zendesk.com/agent
+      if (visited_url.indexOf('.zendesk.com/agent/filters') != -1) {
+        chrome.scripting.executeScript(
+          {
+            target: { 'tabId': tab.id, allFrames: true },
+            func: injectScript,
+            args: [systemState.interval]
+          });
+      }
     }
 
   })
