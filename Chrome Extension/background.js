@@ -34,7 +34,9 @@ function injectScript(interval){
   // Set interval to click button
   zendesk_refresh = setInterval(function(){
     let refresh = document.querySelectorAll("[data-test-id='views_views-list_header-refresh']")[0];
-    refresh.click()
+    if(refresh !== undefined){
+      refresh.click();
+    }
   }, interval * 1000);
 }
 
