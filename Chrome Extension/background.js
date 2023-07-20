@@ -1,7 +1,8 @@
 let systemState = {
   interval: 10 // seconds
-}
+};
 
+// Change default interval to set interval
 chrome.storage.local.get('systemState', function(result){
   let isEmpty = Object.keys(result).length === 0;
   
@@ -13,21 +14,25 @@ chrome.storage.local.get('systemState', function(result){
     console.log('unique interval value exists')
     systemState.interval = result.systemState.interval
   }
-})
+});
 
-async function getTab() {
+async function getZenDeskTabs() {
+
   let queryOptions = { url:"https://*.zendesk.com/agent/filters/*" };
+
   // `tab` will either be a `tabs.Tab` instance or `undefined`.
-  let [tab] = await chrome.tabs.query(queryOptions);
-  console.log(tab)
-  return tab;
+  let [tabs] = await chrome.tabs.query(queryOptions);
+
+  console.log(tabs);
+
+  return tabs;
 }
 
 // Function that runs on ZenDesk Page
-function injectScript(interval){
+function clickRefresh(interval = 1){
 
   // Clear interval if one already exists
-  if(typeof zendesk_refresh != 'undefined'){
+  if(zendesk_refresh !== undefined){
     clearInterval(zendesk_refresh)
   }
 
@@ -40,30 +45,11 @@ function injectScript(interval){
   }, interval * 1000);
 }
 
-chrome.history.onVisited.addListener((visited_site) => {
-  let tab = getTab()
-  tab.then(function (tab) {
-
-    // Change visited_site to just the URL data
-    visited_site = new URL(visited_site.url)
-
-    // Get full URL for string comparison
-    visited_url = visited_site.host + visited_site.pathname
-
-    if(tab.id !== undefined){
-      // Only run this script for urls containing .zendesk.com/agent
-      if (visited_url.indexOf('.zendesk.com/agent/filters') != -1) {
-        chrome.scripting.executeScript(
-          {
-            target: { 'tabId': tab.id, allFrames: true },
-            func: injectScript,
-            args: [systemState.interval]
-          });
-      }
-    }
-
-  })
-})
+chrome.webRequest.onBeforeRequest.addListener((request)=>{
+  if(request.url !== undefined){
+      injectScript(request.tabId, clickRefresh);
+  }
+}, {urls: ['*://*.zendesk.com/agent/filters/*'], types: ["main_frame", "sub_frame", "xmlhttprequest"] });
 
 chrome.runtime.onMessage.addListener(
    function(request, sender, sendResponse){
@@ -78,18 +64,17 @@ chrome.runtime.onMessage.addListener(
       chrome.storage.local.set({'systemState': systemState})
 
       // Show that the interval was loaded
-      console.log('Updated interval to: ' + request.interval + " seconds")
+      // console.log('Updated interval to: ' + request.interval + " seconds")
 
-      // Re-inject script in tab
-      let tab = getTab()
-      tab.then(function (tab) {
-        chrome.scripting.executeScript(
-          {
-            target: { 'tabId': tab.id, allFrames: true },
-            func: injectScript,
-            args: [systemState.interval]
-          });
-      })
+      let tabs = getZenDeskTabs();
+      tabs.then((tabs)=>{
+        
+        // Inject script to click refresh button into each ZenDesk Tab
+        tabs.foreach((tab)=>{
+          injectScript(tab.id, clickRefresh, [systemState.interval]);
+        });
+
+      });
     }
 
     // If popup was opened
@@ -100,5 +85,29 @@ chrome.runtime.onMessage.addListener(
       })
       return true
     }
+
+});
+
+
+function injectScript(tabId, injection, arguments = [10]){
+
+  // Injecting a JS file
+  if(typeof(injection) === 'string'){
+    chrome.scripting.executeScript(
+      {
+        target: { 'tabId': tabId, allFrames: true },
+        func: injectScript,
+        args: arguments
+      });
   }
-)
+
+  // Injecting a function
+  if(typeof(injection) === 'function'){
+    chrome.scripting.executeScript(
+      {
+        target: { 'tabId': tabId, allFrames: true },
+        func: injectScript,
+        args: arguments
+      });
+  }
+}
