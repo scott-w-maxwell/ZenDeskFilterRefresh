@@ -8,22 +8,18 @@ chrome.storage.local.get('systemState', function(result){
   
   // Extensions was installed
   if (isEmpty){
-    console.log('Setting interval in storage to 10')
     chrome.storage.local.set({'systemState': systemState})
   }else{
-    console.log('unique interval value exists')
     systemState.interval = result.systemState.interval
   }
 });
 
 async function getZenDeskTabs() {
 
-  let queryOptions = { url:"https://*.zendesk.com/agent/filters/*" };
+  let queryOptions = { url:"*://*.zendesk.com/agent/filters/*" };
 
   // `tab` will either be a `tabs.Tab` instance or `undefined`.
-  let [tabs] = await chrome.tabs.query(queryOptions);
-
-  console.log(tabs);
+  let tabs = await chrome.tabs.query(queryOptions);
 
   return tabs;
 }
@@ -31,26 +27,34 @@ async function getZenDeskTabs() {
 // Function that runs on ZenDesk Page
 function clickRefresh(interval = 1){
 
+  console.log("clickRefresh Loaded.");
+
   // Clear interval if one already exists
-  if(zendesk_refresh !== undefined){
+  if(typeof(zendesk_refresh) !== 'undefined'){
     clearInterval(zendesk_refresh)
   }
 
   // Set interval to click button
   zendesk_refresh = setInterval(function(){
     let refresh = document.querySelectorAll("[data-test-id='views_views-list_header-refresh']")[0];
-    if(refresh !== undefined){
+
+    // Only click when page is a filter/view
+    if(refresh !== undefined && window.location.href.includes(".zendesk.com/agent/filters/")){
+      console.log("Clicked refresh button");
       refresh.click();
     }
   }, interval * 1000);
 }
 
-chrome.webRequest.onBeforeRequest.addListener((request)=>{
-  if(request.url !== undefined){
+// Detects when navigation to zendesk filter occurs
+chrome.webNavigation.onCompleted.addListener((request)=>{
+  if(request.url.includes("zendesk.com/agent/filters/")){
+      console.log("calling injection");
       injectScript(request.tabId, clickRefresh);
   }
-}, {urls: ['*://*.zendesk.com/agent/filters/*'], types: ["main_frame", "sub_frame", "xmlhttprequest"] });
+}, {urls: ['*://*.zendesk.com/agent/filters/*'], types: ["main_frame"] });
 
+// Used for updating pop-up and interval
 chrome.runtime.onMessage.addListener(
    function(request, sender, sendResponse){
 
@@ -63,14 +67,14 @@ chrome.runtime.onMessage.addListener(
       // Set new interval in storage
       chrome.storage.local.set({'systemState': systemState})
 
-      // Show that the interval was loaded
-      // console.log('Updated interval to: ' + request.interval + " seconds")
+      //Show the new interval value in console
+      console.log('Updated interval to: ' + request.interval + " seconds");
 
       let tabs = getZenDeskTabs();
       tabs.then((tabs)=>{
-        
+
         // Inject script to click refresh button into each ZenDesk Tab
-        tabs.foreach((tab)=>{
+        tabs.forEach((tab)=>{
           injectScript(tab.id, clickRefresh, [systemState.interval]);
         });
 
@@ -80,7 +84,6 @@ chrome.runtime.onMessage.addListener(
     // If popup was opened
     if (request.action == 'getInterval') {
       chrome.storage.local.get('systemState', function(result) {
-        console.log(result)
         sendResponse(result);
       })
       return true
@@ -96,7 +99,7 @@ function injectScript(tabId, injection, arguments = [10]){
     chrome.scripting.executeScript(
       {
         target: { 'tabId': tabId, allFrames: true },
-        func: injectScript,
+        func: clickRefresh,
         args: arguments
       });
   }
@@ -106,7 +109,7 @@ function injectScript(tabId, injection, arguments = [10]){
     chrome.scripting.executeScript(
       {
         target: { 'tabId': tabId, allFrames: true },
-        func: injectScript,
+        func: clickRefresh,
         args: arguments
       });
   }

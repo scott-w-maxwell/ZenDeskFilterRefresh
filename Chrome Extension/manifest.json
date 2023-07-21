@@ -14,7 +14,7 @@
       "128":"icon.png"
     },
   "permissions":[
-    "scripting", "storage", "tabs", "webRequest"
+    "scripting", "storage", "tabs", "webRequest", "webNavigation"
   ],
   "host_permissions":[
     "https://*.zendesk.com/agent/*"
