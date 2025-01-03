@@ -10,7 +10,7 @@
   "icons":{
     "128":"icon.png"
   },
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage"],
   "content_scripts": [   
     {
         "run_at": "document_start",
