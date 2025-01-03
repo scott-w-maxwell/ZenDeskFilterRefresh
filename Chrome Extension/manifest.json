@@ -1,22 +1,23 @@
 {
   "name": "Zendesk Refresher",
   "description": "Automatically refreshes the ZenDesk Ticket Counts for the different views",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "manifest_version": 3,
-  "background": {
-      "service_worker": "background.js"
-    },
-    "action": {
-      "default_icon": "icon.png",
-      "default_popup": "popup.html"
-    },
-    "icons":{
-      "128":"icon.png"
-    },
-  "permissions":[
-    "scripting", "storage", "tabs", "webNavigation"
-  ],
-  "host_permissions":[
-    "https://*.zendesk.com/agent/*"
+  "action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "icons":{
+    "128":"icon.png"
+  },
+  "permissions": ["storage", "activeTab"],
+  "content_scripts": [   
+    {
+        "run_at": "document_start",
+        "js": ["contentscript.js"],
+        "matches": [
+            "https://*.zendesk.com/agent/*"
+        ]
+    }
   ]
 }
